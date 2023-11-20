@@ -1,11 +1,15 @@
-﻿namespace SKbeautyStudio.Db
+﻿using Microsoft.Build.Framework;
+
+namespace SKbeautyStudio.Db
 {
     public class Categories
     {
         public int Id { get; set; }
+        [Required]
         public string Name { get; set; }
-        public string Color { get; set; }
+        
+        public string? Color { get; set; }
 
-        public ICollection<Services> Services { get; set; }
+        public ICollection<Services>? Services { get; set; }
     }
 }

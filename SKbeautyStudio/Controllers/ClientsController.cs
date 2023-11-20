@@ -22,13 +22,13 @@ namespace SKbeautyStudio.Controllers
 
         // GET: api/Clients
         [HttpGet]
-        public async Task<ActionResult<IEnumerable<Client>>> GetClients()
+        public async Task<ActionResult<IEnumerable<Clients>>> GetClients()
         {
           if (_context.Clients == null)
           {
               return NotFound();
           }
-            return await _context.Clients.Select(c => new Client
+            return await _context.Clients.Select(c => new Clients
             {
                 Id = c.Id,
                 Name = c.Name,
@@ -44,7 +44,7 @@ namespace SKbeautyStudio.Controllers
 
         // GET: api/Clients/5
         [HttpGet("{id}")]
-        public async Task<ActionResult<Client>> GetClient(int id)
+        public async Task<ActionResult<Clients>> GetClient(int id)
         {
           if (_context.Clients == null)
           {
@@ -64,7 +64,7 @@ namespace SKbeautyStudio.Controllers
         // PUT: api/Clients/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPut("{id}")]
-        public async Task<IActionResult> PutClient(int id, Client client)
+        public async Task<IActionResult> PutClient(int id, Clients client)
         {
             if (id != client.Id)
             {
@@ -95,7 +95,7 @@ namespace SKbeautyStudio.Controllers
         // POST: api/Clients
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
         [HttpPost]
-        public async Task<ActionResult<Client>> PostClient(Client client)
+        public async Task<ActionResult<Clients>> PostClient(Clients client)
         {
           if (_context.Clients == null)
           {

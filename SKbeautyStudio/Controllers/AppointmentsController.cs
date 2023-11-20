@@ -38,8 +38,8 @@ namespace SKbeautyStudio.Controllers
                 EndDateTime = a.EndDateTime,
                 StatusId = a.StatusId,
                 Price = a.Price,
-                Client = _context.Clients.Where(c => c.Id == a.ClientId).FirstOrDefault(),
-                Employee = _context.Employees.Where(e => e.Id == a.EmployeeId).FirstOrDefault(),
+                Client = _context.Clients.Where(c => c.Id == a.ClientId)
+                                         .FirstOrDefault(),
                 Service = _context.Services.Where(s => s.Id == a.ServiceId).Select(s => new Services
                 {
                     Id = s.Id,
@@ -68,7 +68,6 @@ namespace SKbeautyStudio.Controllers
                 return NotFound();
             }
 
-            appointments.Employee = await _context.Employees.FindAsync(appointments.EmployeeId);
             appointments.Service = await _context.Services.FindAsync(appointments.ServiceId);
             appointments.Status = await _context.StatusesOfAppointments.FindAsync(appointments.StatusId);
 
