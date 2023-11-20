@@ -34,12 +34,21 @@ namespace SKbeautyStudio.Controllers
                 ClientId= a.ClientId,
                 EmployeeId = a.EmployeeId,
                 ServiceId = a.ServiceId,
-                DateTime = a.DateTime,
+                StartDateTime = a.StartDateTime,
+                EndDateTime = a.EndDateTime,
                 StatusId = a.StatusId,
                 Price = a.Price,
                 Client = _context.Clients.Where(c => c.Id == a.ClientId).FirstOrDefault(),
                 Employee = _context.Employees.Where(e => e.Id == a.EmployeeId).FirstOrDefault(),
-                Service = _context.Services.Where(s => s.Id == a.ServiceId).FirstOrDefault(),
+                Service = _context.Services.Where(s => s.Id == a.ServiceId).Select(s => new Services
+                {
+                    Id = s.Id,
+                    Name= s.Name,
+                    BaseCost= s.BaseCost,
+                    BaseTimeMinutes= s.BaseTimeMinutes,
+                    CategoryId= s.CategoryId,
+                    Category= _context.Categories.Where(c => c.Id == s.CategoryId).FirstOrDefault()
+                }).FirstOrDefault(),
                 Status = _context.StatusesOfAppointments.Where(soa => soa.Id == a.StatusId).FirstOrDefault()
             }).ToListAsync();
         }
