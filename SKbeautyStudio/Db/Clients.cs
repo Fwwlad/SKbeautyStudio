@@ -1,5 +1,4 @@
-﻿using Newtonsoft.Json;
-
+﻿
 namespace SKbeautyStudio.Db
 {
     public class Clients

@@ -57,7 +57,7 @@ namespace SKbeautyStudio.Controllers
             {
                 Id = c.Id,
                 Name = c.Name,
-                Color = c.Color
+                UIColor = c.UIColor
             }).ToList().Find(c => c.Id == services.CategoryId);
             return services;
         }

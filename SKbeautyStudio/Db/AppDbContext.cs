@@ -1,4 +1,5 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SKbeautyStudio.Db;
 
 namespace SKbeautyStudio.Db
 {
@@ -10,7 +11,8 @@ namespace SKbeautyStudio.Db
         public DbSet<Services> Services { get; set; }
         public DbSet<StatusesOfAppointments> StatusesOfAppointments { get; set; }
         public DbSet<Categories> Categories { get; set; }
-
+        public DbSet<SKbeautyStudio.Db.Employees> Employees { get; set; }
+        public DbSet<SKbeautyStudio.Db.PhotosOfEmployees> photosOfEmployees { get; set; }
 
     }
 }
