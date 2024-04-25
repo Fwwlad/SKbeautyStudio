@@ -37,7 +37,8 @@ namespace SKbeautyStudio.Controllers
                 EndDateTime = a.EndDateTime,
                 StatusId = a.StatusId,
                 Price = a.Price,
-                Client = _context.Clients.Where(c => c.Id == a.ClientId).FirstOrDefault(),
+                Client = _context.Clients.Where(c => c.Id == a.ClientId)
+                                         .FirstOrDefault(),
                 Service = _context.Services.Where(s => s.Id == a.ServiceId).Select(s => new Services
                 {
                     Id = s.Id,

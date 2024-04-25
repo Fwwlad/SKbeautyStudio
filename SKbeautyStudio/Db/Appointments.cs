@@ -12,9 +12,9 @@ namespace SKbeautyStudio.Db
         public DateTime EndDateTime { get; set; }
         public int StatusId { get; set; }
         public int Price { get; set; }
-        public Client Client { get; set; }
-        public Services Service { get; set; }
-        public StatusesOfAppointments Status { get; set; }
+        public Clients? Client { get; set; }
+        public Services? Service { get; set; }
+        public StatusesOfAppointments? Status { get; set; }
 
     }
 }
