@@ -32,7 +32,7 @@ namespace SKbeautyStudio.Controllers
             {
                 Id = c.Id,
                 Name = c.Name,
-                Color = c.Color,
+                UIColor = c.UIColor,
                 Services = _context.Services.Where(s => s.CategoryId == c.Id)
                                             .Select(s => new Services
                                             {

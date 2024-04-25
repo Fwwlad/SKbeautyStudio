@@ -10,7 +10,7 @@ builder.Services.AddControllers();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSwaggerGen();
 var StringConnection = builder.Configuration["ConnectionString"];
-//StringConnection = builder.Configuration.GetConnectionString("StringConnection");
+//string StringConnection = builder.Configuration.GetConnectionString("ConnectionString");
 builder.Services.AddDbContext<AppDbContext>(
     options => options.UseSqlServer(StringConnection)
     );
@@ -22,7 +22,6 @@ if (app.Environment.IsDevelopment())
 {
     app.UseSwagger();
     app.UseSwaggerUI();
-
 }
 
 app.UseHttpsRedirection();

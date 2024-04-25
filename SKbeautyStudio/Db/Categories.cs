@@ -8,7 +8,7 @@ namespace SKbeautyStudio.Db
         [Required]
         public string Name { get; set; }
         
-        public string? Color { get; set; }
+        public string? UIColor { get; set; }
 
         public ICollection<Services>? Services { get; set; }
     }

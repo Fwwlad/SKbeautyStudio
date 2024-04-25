@@ -69,6 +69,8 @@ namespace SKbeautyStudio.Controllers
 
             appointments.Service = await _context.Services.FindAsync(appointments.ServiceId);
             appointments.Status = await _context.StatusesOfAppointments.FindAsync(appointments.StatusId);
+            appointments.Client = await _context.Clients.FindAsync(appointments.ClientId);
+            appointments.Client.Appointments = null;
 
             return appointments;
         }

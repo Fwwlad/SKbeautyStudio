@@ -1,4 +1,6 @@
 ﻿using Microsoft.EntityFrameworkCore;
+using SKbeautyStudio.Db;
+using System.Reflection.Metadata;
 
 namespace SKbeautyStudio.Db
 {
@@ -10,7 +12,10 @@ namespace SKbeautyStudio.Db
         public DbSet<Services> Services { get; set; }
         public DbSet<StatusesOfAppointments> StatusesOfAppointments { get; set; }
         public DbSet<Categories> Categories { get; set; }
-
-
+        public DbSet<Employees> Employees { get; set; }
+        public DbSet<PhotosOfEmployees> photosOfEmployees { get; set; }
+        public DbSet<Materials> Materials { get; set; }
+        public DbSet<ExpirationDates> ExpirationDates { get; set; }
+        
     }
 }

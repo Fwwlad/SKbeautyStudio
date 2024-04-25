@@ -1,6 +1,4 @@
-﻿using Microsoft.Build.Framework;
-using System;
-
+﻿
 namespace SKbeautyStudio.Db
 {
     public class Appointments
