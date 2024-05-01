@@ -17,5 +17,6 @@ namespace SKbeautyStudio.Db
         public DbSet<PhotosOfEmployees> photosOfEmployees { get; set; }
         public DbSet<Materials> Materials { get; set; }
         public DbSet<ExpirationDates> ExpirationDates { get; set; }
+        public DbSet<MessagesTemplates> MessagesTemplates { get; set; }
     }
 }

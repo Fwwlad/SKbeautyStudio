@@ -7,6 +7,6 @@ namespace SKbeautyStudio.Db
     {
         public int Id { get; set; }
         public int EmployeeId { get; set; }
-        public string Source { get; set; }
+        public string Source { get; set; } = "";
     }
 }

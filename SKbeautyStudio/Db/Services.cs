@@ -6,7 +6,7 @@ namespace SKbeautyStudio.Db
     {
         public int Id { get; set; }
         [Required]
-        public string Name { get; set; }
+        public string Name { get; set; } = "";
         [Required]
         public int BaseTimeMinutes { get; set; }
         [Required]

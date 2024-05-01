@@ -41,7 +41,9 @@ namespace SKbeautyStudio.Controllers
                                                 CategoryId = s.CategoryId,
                                                 BaseCost = s.BaseCost,
                                                 BaseTimeMinutes = s.BaseTimeMinutes
-                                            }).ToArray()
+                                            }).ToArray(),
+                MessagesTemplates = _context.MessagesTemplates.Where(mt => mt.CategoryId == c.Id).ToArray()
+                
             }).ToListAsync();
         }
 
@@ -67,6 +69,7 @@ namespace SKbeautyStudio.Controllers
                 BaseCost = s.BaseCost,
                 BaseTimeMinutes = s.BaseTimeMinutes
             }).ToArray();
+            categories.MessagesTemplates = _context.MessagesTemplates.Where(mt => mt.CategoryId == categories.Id).ToArray();
             return categories;
         }
 
@@ -134,6 +137,30 @@ namespace SKbeautyStudio.Controllers
             await _context.SaveChangesAsync();
 
             return NoContent();
+        }
+        [HttpGet("{id}/messages")]
+        public async Task<ActionResult<IEnumerable<MessagesTemplates>>> GetMessages(int id)
+        {
+            if (_context.Categories == null)
+            {
+                return NotFound();
+            }
+            var messages = await _context.MessagesTemplates.Where(mt => mt.CategoryId == id).Select(m => new MessagesTemplates
+            {
+                Id = m.Id,
+                CategoryId = m.CategoryId,
+                Before = m.Before,
+                HoursCount = m.HoursCount,
+                Text = m.Text,
+                TimeStamp = m.TimeStamp
+            }).ToListAsync();
+
+            if (messages == null)
+            {
+                return NotFound();
+            }
+
+            return messages;
         }
 
         private bool CategoriesExists(int id)

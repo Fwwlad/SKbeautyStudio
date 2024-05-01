@@ -40,6 +40,7 @@ namespace SKbeautyStudio.Controllers
                     PurchaseDate = edn.PurchaseDate,
                     DisposalDate = edn.DisposalDate
                 }).ToList()
+                
             }).ToListAsync();
         }
 
