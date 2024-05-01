@@ -13,9 +13,9 @@ namespace SKbeautyStudio.Db
         public DbSet<StatusesOfAppointments> StatusesOfAppointments { get; set; }
         public DbSet<Categories> Categories { get; set; }
         public DbSet<Employees> Employees { get; set; }
+        public DbSet<EmployeesPasswords> EmployeesPasswords { get; set; }
         public DbSet<PhotosOfEmployees> photosOfEmployees { get; set; }
         public DbSet<Materials> Materials { get; set; }
         public DbSet<ExpirationDates> ExpirationDates { get; set; }
-        
     }
 }

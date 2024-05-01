@@ -8,6 +8,7 @@ using Microsoft.EntityFrameworkCore;
 using SKbeautyStudio.Db;
 using Newtonsoft.Json.Linq;
 using System.Text;
+using System.Security.Cryptography;
 
 namespace SKbeautyStudio.Controllers
 {
@@ -68,12 +69,6 @@ namespace SKbeautyStudio.Controllers
         public async Task<ActionResult<List<string>>> GetEmployePhotos(int id)
         {
             if (_context.Employees == null)
-            {
-                return NotFound();
-            }
-            var employees = await _context.Employees.FindAsync(id);
-
-            if (employees == null)
             {
                 return NotFound();
             }
@@ -178,7 +173,173 @@ namespace SKbeautyStudio.Controllers
 
             return NoContent();
         }
+        [HttpGet("{id}/password/validate/{password}")]
+        public async Task<ActionResult<bool>> CheckPassword(int id, string password)
+        {
+            if (_context.Employees == null)
+            {
+                return NotFound();
+            }
+            var employee = await _context.Employees.FindAsync(id);
+            if (employee is null)
+            {
+                return NotFound();
+            }
+            int count = _context.EmployeesPasswords.Where(ep => ep.EmployeeId == id).Count();
+            if (count == 0)
+            {
+                return NotFound();
+            }
+            if (count > 1)
+            {
+                return Problem("More than one password is set for the account");
+            }
+            return validatePassword(id, password);
+        }
+        [HttpPost("{id}/password")]
+        public async Task<IActionResult> SetPassword(int id, string password)
+        {
+            if (_context.Employees == null)
+            {
+                return Problem("Entity set 'AppDbContext.Employees'  is null.");
+            }
+            if(await _context.Employees.FindAsync(id) == null)
+            {
+                return NotFound();
+            }
+            if(_context.EmployeesPasswords.Where(ep => ep.EmployeeId == id).Count() > 0)
+            {
+                return Problem("The password has already been set");
+            }
+            
+            byte[] tmpSource;
+            byte[] tmpHash;
 
+            using(SHA256 hash = SHA256.Create())
+            {
+                tmpSource = Encoding.UTF8.GetBytes(password);
+                tmpHash =  hash.ComputeHash(tmpSource);
+            }
+
+            
+            StringBuilder sOutput = new StringBuilder(tmpHash.Length);
+            for (int i = 0; i < tmpHash.Length; i++)
+            {
+                sOutput.Append(tmpHash[i].ToString("X2"));
+            }
+
+            var employeePassword = new EmployeesPasswords
+            {
+                EmployeeId = id,
+                Password = sOutput.ToString()
+            };
+            _context.EmployeesPasswords.Add(employeePassword);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+        [HttpPut("{id}/password")]
+        public async Task<IActionResult> UpdatePassword(int id, string oldPassword, string newPassword)
+        {
+            if (_context.Employees == null)
+            {
+                return NotFound();
+            }
+            if (_context.EmployeesPasswords.Where(ep => ep.EmployeeId == id).Count() == 0)
+            {
+                return NotFound();
+            }
+            if (await _context.Employees.FindAsync(id) == null)
+            {
+                return NotFound();
+            }
+            if (!validatePassword(id, oldPassword))
+            {
+                return Problem("The old password is incorrect");
+            }
+            if (oldPassword == newPassword)
+            {
+                return Problem("The new password must be different from the old one");
+            }
+            byte[] tmpSource;
+            byte[] tmpHash;
+
+            using (SHA256 hash = SHA256.Create())
+            {
+                tmpSource = Encoding.UTF8.GetBytes(newPassword);
+                tmpHash = hash.ComputeHash(tmpSource);
+            }
+
+            StringBuilder sOutput = new StringBuilder(tmpHash.Length);
+            for (int i = 0; i < tmpHash.Length; i++)
+            {
+                sOutput.Append(tmpHash[i].ToString("X2"));
+            }
+
+            EmployeesPasswords employeePassword = _context.EmployeesPasswords.Where(ep => ep.EmployeeId == id).First();
+            if(employeePassword.Password == sOutput.ToString())
+            {
+                return Problem("The new password must be different from the old one");
+            }
+            employeePassword.Password = sOutput.ToString();
+            _context.Entry(employeePassword).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!EmployeesExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
+        }
+        [HttpDelete("{id}/password")]
+        public async Task<IActionResult> DeletePassword(int id)
+        {
+            if (_context.Employees == null)
+            {
+                return NotFound();
+            }
+            if (_context.EmployeesPasswords.Where(ep => ep.EmployeeId == id).Count() == 0)
+            {
+                return NotFound();
+            }
+            var employeePassword = _context.EmployeesPasswords.Where(ep => ep.EmployeeId == id).First();            
+
+            _context.EmployeesPasswords.Remove(employeePassword);
+            await _context.SaveChangesAsync();
+
+            return NoContent();
+        }
+        private bool validatePassword(int id, string password)
+        {
+            EmployeesPasswords employeePassword = _context.EmployeesPasswords.Where(ep => ep.EmployeeId == id).First();
+            byte[] tmpSource;
+            byte[] tmpHash;
+
+            using (SHA256 hash = SHA256.Create())
+            {
+                tmpSource = Encoding.UTF8.GetBytes(password);
+                tmpHash = hash.ComputeHash(tmpSource);
+            }
+
+            StringBuilder sOutput = new StringBuilder(tmpHash.Length);
+            for (int i = 0; i < tmpHash.Length; i++)
+            {
+                sOutput.Append(tmpHash[i].ToString("X2"));
+            }
+
+            return sOutput.ToString() == employeePassword.Password;
+        }
         private bool EmployeesExists(int id)
         {
             return (_context.Employees?.Any(e => e.Id == id)).GetValueOrDefault();
