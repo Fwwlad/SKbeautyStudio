@@ -28,7 +28,16 @@ namespace SKbeautyStudio.Controllers
           {
               return NotFound();
           }
-            return await _context.ExpirationDates.ToListAsync();
+            return await _context.ExpirationDates.Select(e => new ExpirationDates
+            {
+                Id = e.Id,
+                StartDate= e.StartDate,
+                EndDate= e.EndDate,
+                PurchaseDate= e.PurchaseDate,
+                DisposalDate= e.DisposalDate,
+                MaterialId=e.MaterialId,
+                Material = _context.Materials.Where(m => m.Id == e.MaterialId).FirstOrDefault()
+            }).ToListAsync();
         }
 
         // GET: api/materials/ExpirationDates/5
