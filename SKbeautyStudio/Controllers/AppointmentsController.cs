@@ -32,7 +32,6 @@ namespace SKbeautyStudio.Controllers
             {
                 Id = a.Id,
                 ClientId= a.ClientId,
-                EmployeeId = a.EmployeeId,
                 ServiceId = a.ServiceId,
                 StartDateTime = a.StartDateTime,
                 EndDateTime = a.EndDateTime,

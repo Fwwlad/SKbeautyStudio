@@ -5,7 +5,6 @@ namespace SKbeautyStudio.Db
     {
         public int Id { get; set; }
         public int ClientId { get; set; }
-        public int EmployeeId { get; set; }
         public int ServiceId { get; set; }
         public DateTime StartDateTime { get; set; }
         public DateTime EndDateTime { get; set; }
