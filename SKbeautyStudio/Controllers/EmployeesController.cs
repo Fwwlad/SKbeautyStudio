@@ -42,7 +42,20 @@ namespace SKbeautyStudio.Controllers
                 DateOfHire = e.DateOfHire,
                 Gender = e.Gender,
                 Email = e.Email,
-                SalaryPercent = e.SalaryPercent
+                SalaryPercent = e.SalaryPercent,
+                EmployeeMobileAppPages = _context.EmployeesMobileAppPages
+                                        .Where(emap => emap.EmployeeId == e.Id)
+                                        .Select(emap => new EmployeesMobileAppPages
+                                        {
+                                            EmployeeId = emap.EmployeeId,
+                                            MobileAppPageId = emap.MobileAppPageId,
+                                            CanView = emap.CanView,
+                                            CanAdd = emap.CanAdd,
+                                            CanDelete = emap.CanDelete,
+                                            CanEdit = emap.CanEdit,
+                                            Employee = null,
+                                            MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
+                                        }).ToArray()
             }).ToListAsync();
         }
 
@@ -55,12 +68,25 @@ namespace SKbeautyStudio.Controllers
               return NotFound();
           }
             var employees = await _context.Employees.FindAsync(id);
-
+            
             if (employees == null)
             {
                 return NotFound();
             }
 
+            employees.EmployeeMobileAppPages = _context.EmployeesMobileAppPages
+                                        .Where(emap => emap.EmployeeId == employees.Id)
+                                        .Select(emap => new EmployeesMobileAppPages
+                                        {
+                                            EmployeeId = emap.EmployeeId,
+                                            MobileAppPageId = emap.MobileAppPageId,
+                                            CanView = emap.CanView,
+                                            CanAdd = emap.CanAdd,
+                                            CanDelete = emap.CanDelete,
+                                            CanEdit = emap.CanEdit,
+                                            Employee = null,
+                                            MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
+                                        }).ToList();
             return employees;
         }
         
@@ -107,6 +133,54 @@ namespace SKbeautyStudio.Controllers
             await _context.SaveChangesAsync();
 
             return CreatedAtAction("GetEmployePhotos", new { id = photo.EmployeeId }, photo);
+        }
+        [HttpPost("rights")]
+        public async Task<ActionResult<bool>> PostEmployees(EmployeesMobileAppPages rights)
+        {
+
+            if (_context.Employees == null)
+            {
+                return Problem("Entity set 'AppDbContext.Employees'  is null.");
+            }
+            try
+            {
+                _context.EmployeesMobileAppPages.Add(rights);
+                await _context.SaveChangesAsync();
+            } catch(Exception ex)
+            {
+                return false;
+            }
+
+
+            return true;
+        }
+        [HttpPut("{id}/rights")]
+        public async Task<IActionResult> PutEmployees(int id, EmployeesMobileAppPages rights)
+        {
+            if (id != rights.EmployeeId)
+            {
+                return BadRequest();
+            }
+
+            _context.Entry(rights).State = EntityState.Modified;
+
+            try
+            {
+                await _context.SaveChangesAsync();
+            }
+            catch (DbUpdateConcurrencyException)
+            {
+                if (!EmployeesExists(id))
+                {
+                    return NotFound();
+                }
+                else
+                {
+                    throw;
+                }
+            }
+
+            return NoContent();
         }
         // PUT: api/Employees/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -239,7 +313,7 @@ namespace SKbeautyStudio.Controllers
             return NoContent();
         }
         [HttpPut("{id}/password")]
-        public async Task<IActionResult> UpdatePassword(int id, string oldPassword, string newPassword)
+        public async Task<IActionResult> UpdatePassword(int id, string newPassword)
         {
             if (_context.Employees == null)
             {
@@ -253,14 +327,7 @@ namespace SKbeautyStudio.Controllers
             {
                 return NotFound();
             }
-            if (!validatePassword(id, oldPassword))
-            {
-                return Problem("The old password is incorrect");
-            }
-            if (oldPassword == newPassword)
-            {
-                return Problem("The new password must be different from the old one");
-            }
+
             byte[] tmpSource;
             byte[] tmpHash;
 

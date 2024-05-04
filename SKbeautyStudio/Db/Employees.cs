@@ -12,5 +12,6 @@
         public char Gender { get; set; }
         public string? Email { get; set; }
         public double SalaryPercent { get; set; }
+        public ICollection<EmployeesMobileAppPages>? EmployeeMobileAppPages { get; set; }
     }
 }

@@ -33,6 +33,7 @@ namespace SKbeautyStudio.Controllers
                 Id = m.Id,
                 Name = m.Name,
                 Color = m.Color,
+                Number = m.Number,
                 ExpirationDates = _context.ExpirationDates.Where(ed => ed.MaterialId == m.Id).Select(edn => new ExpirationDates
                 {
                     StartDate = edn.StartDate,
@@ -63,6 +64,7 @@ namespace SKbeautyStudio.Controllers
                 Id = materials.Id,
                 Name = materials.Name,
                 Color = materials.Color,
+                Number = materials.Number,
                 ExpirationDates = _context.ExpirationDates.Where(ed => ed.MaterialId == materials.Id).Select(edn => new ExpirationDates
                 {
                     StartDate = edn.StartDate,
