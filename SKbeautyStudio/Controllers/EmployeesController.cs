@@ -247,31 +247,43 @@ namespace SKbeautyStudio.Controllers
 
             return NoContent();
         }
-        [HttpGet("{id}/password/validate/{password}")]
-        public async Task<ActionResult<bool>> CheckPassword(int id, string password)
+        [HttpGet("{login}/password/validate/{password}")]
+        public async Task<ActionResult<ICollection<EmployeesMobileAppPages>>> CheckPassword(string login, string password)
         {
             if (_context.Employees == null)
             {
                 return NotFound();
             }
-            var employee = await _context.Employees.FindAsync(id);
-            if (employee is null)
+            EmployeesPasswords? account = await _context.EmployeesPasswords.FindAsync(login);
+            if (account is null)
             {
                 return NotFound();
             }
-            int count = _context.EmployeesPasswords.Where(ep => ep.EmployeeId == id).Count();
-            if (count == 0)
+            
+            if (validatePassword(account, password))
             {
-                return NotFound();
+                var rights = await _context.EmployeesMobileAppPages.Where(emap => emap.EmployeeId == account.EmployeeId).Select(
+                    emap => new EmployeesMobileAppPages
+                    {
+                        EmployeeId = emap.EmployeeId,
+                        MobileAppPageId = emap.MobileAppPageId,
+                        CanAdd = emap.CanAdd,
+                        CanDelete = emap.CanDelete,
+                        CanEdit = emap.CanEdit,
+                        CanView = emap.CanView,
+                        Employee = _context.Employees.Where(e => e.Id == emap.EmployeeId).FirstOrDefault(),
+                        MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
+                    }
+                ).ToListAsync();
+                
+                return rights is null ? NoContent() : rights;
             }
-            if (count > 1)
-            {
-                return Problem("More than one password is set for the account");
-            }
-            return validatePassword(id, password);
+
+
+            return NoContent();
         }
         [HttpPost("{id}/password")]
-        public async Task<IActionResult> SetPassword(int id, string password)
+        public async Task<IActionResult> SetPassword(int id, string login, string password)
         {
             if (_context.Employees == null)
             {
@@ -304,6 +316,7 @@ namespace SKbeautyStudio.Controllers
 
             var employeePassword = new EmployeesPasswords
             {
+                Login = login,
                 EmployeeId = id,
                 Password = sOutput.ToString()
             };
@@ -387,9 +400,8 @@ namespace SKbeautyStudio.Controllers
 
             return NoContent();
         }
-        private bool validatePassword(int id, string password)
+        private bool validatePassword(EmployeesPasswords employeePassword, string password)
         {
-            EmployeesPasswords employeePassword = _context.EmployeesPasswords.Where(ep => ep.EmployeeId == id).First();
             byte[] tmpSource;
             byte[] tmpHash;
 
