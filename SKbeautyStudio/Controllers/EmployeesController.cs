@@ -57,7 +57,9 @@ namespace SKbeautyStudio.Controllers
                                             CanEdit = emap.CanEdit,
                                             Employees = null,
                                             MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
-                                        }).ToArray()
+                                        }).ToArray(),
+                AvailableCategories = _context.EmployeesJobTitles
+                                      .Where(ejt => ejt.EmployeesId == e.Id).ToArray()
             }).ToListAsync();
         } catch(Exception ex)
             {
@@ -93,7 +95,7 @@ namespace SKbeautyStudio.Controllers
                                             Employees = null,
                                             MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
                                         }).ToList();
-            
+            employees.AvailableCategories = _context.EmployeesJobTitles.Where(ejt => ejt.EmployeesId == employees.Id).ToArray();
             return employees;
         }
         
