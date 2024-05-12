@@ -163,6 +163,25 @@ namespace SKbeautyStudio.Controllers
 
             return true;
         }
+        [HttpPost("job")]
+        public async Task<ActionResult<bool>> PostEmployees(EmployeesJobTitles jobTitles)
+        {
+
+            if (_context.Employees == null)
+            {
+                return Problem("Entity set 'AppDbContext.Employees'  is null.");
+            }
+            try
+            {
+                _context.EmployeesJobTitles.Add(jobTitles);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
+            return true;
+        }
         [HttpPut("{id}/rights")]
         public async Task<IActionResult> PutEmployees(int id, EmployeesMobileAppPages rights)
         {
