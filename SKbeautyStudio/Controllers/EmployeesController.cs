@@ -31,6 +31,8 @@ namespace SKbeautyStudio.Controllers
           {
               return NotFound();
           }
+            try
+            {
             return await _context.Employees.Select(e => new Employees
             {
                 Id = e.Id, 
@@ -53,10 +55,16 @@ namespace SKbeautyStudio.Controllers
                                             CanAdd = emap.CanAdd,
                                             CanDelete = emap.CanDelete,
                                             CanEdit = emap.CanEdit,
-                                            Employee = null,
+                                            Employees = null,
                                             MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
-                                        }).ToArray()
+                                        }).ToArray(),
+                AvailableCategories = _context.EmployeesJobTitles
+                                      .Where(ejt => ejt.EmployeesId == e.Id).ToArray()
             }).ToListAsync();
+        } catch(Exception ex)
+            {
+                return NotFound(ex.Message + '\n' + ex.Source + '\n' + ex.InnerException + '\n' + ex.HelpLink);
+            }
         }
 
         // GET: api/Employees/5
@@ -84,9 +92,10 @@ namespace SKbeautyStudio.Controllers
                                             CanAdd = emap.CanAdd,
                                             CanDelete = emap.CanDelete,
                                             CanEdit = emap.CanEdit,
-                                            Employee = null,
+                                            Employees = null,
                                             MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
                                         }).ToList();
+            employees.AvailableCategories = _context.EmployeesJobTitles.Where(ejt => ejt.EmployeesId == employees.Id).ToArray();
             return employees;
         }
         
@@ -271,7 +280,7 @@ namespace SKbeautyStudio.Controllers
                         CanDelete = emap.CanDelete,
                         CanEdit = emap.CanEdit,
                         CanView = emap.CanView,
-                        Employee = _context.Employees.Where(e => e.Id == emap.EmployeeId).FirstOrDefault(),
+                        Employees = _context.Employees.Where(e => e.Id == emap.EmployeeId).FirstOrDefault(),
                         MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
                     }
                 ).ToListAsync();

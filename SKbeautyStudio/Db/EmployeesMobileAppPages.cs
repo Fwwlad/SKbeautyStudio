@@ -11,7 +11,7 @@ namespace SKbeautyStudio.Db
         public bool CanAdd { get; set; } = false;
         public bool CanEdit { get; set; } = false; 
         public bool CanDelete { get; set; } = false;
-        public Employees? Employee { get; set; }
+        public Employees? Employees { get; set; }
         public MobileAppPages? MobileAppPage { get; set; }
     }
 }

@@ -32,7 +32,7 @@ namespace SKbeautyStudio.Controllers
             {
                 Id = mt.Id,
                 Before = mt.Before,
-                CategoryId = mt.CategoryId,
+                CategoriesId = mt.CategoriesId,
                 HoursCount = mt.HoursCount,
                 Text = mt.Text,
                 TimeStamp = mt.TimeStamp,
@@ -40,7 +40,8 @@ namespace SKbeautyStudio.Controllers
                 {
                     Id = mt.Category.Id,
                     UIColor = mt.Category.UIColor,
-                    Name = mt.Category.Name
+                    Name = mt.Category.Name,
+                    JobName = mt.Category.JobName
                 }
             }).ToListAsync();
         }
@@ -60,11 +61,12 @@ namespace SKbeautyStudio.Controllers
                 return NotFound();
             }
             
-            messagesTemplates.Category = _context.Categories.Where(c => c.Id == messagesTemplates.CategoryId).Select(c => new Categories
+            messagesTemplates.Category = _context.Categories.Where(c => c.Id == messagesTemplates.CategoriesId).Select(c => new Categories
             {
                 Id = c.Id,
                 Name = c.Name,
-                UIColor = c.UIColor
+                UIColor = c.UIColor,
+                JobName = c.JobName
             }).FirstOrDefault();
             
             return messagesTemplates;

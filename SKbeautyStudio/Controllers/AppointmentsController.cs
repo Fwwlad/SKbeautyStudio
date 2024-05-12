@@ -24,32 +24,41 @@ namespace SKbeautyStudio.Controllers
         [HttpGet]
         public async Task<ActionResult<IEnumerable<Appointments>>> GetAppointments()
         {
-          if (_context.Appointments == null)
-          {
-              return NotFound();
-          }
-            return await _context.Appointments.Select(a => new Appointments
+            try
             {
-                Id = a.Id,
-                ClientId= a.ClientId,
-                ServiceId = a.ServiceId,
-                StartDateTime = a.StartDateTime,
-                EndDateTime = a.EndDateTime,
-                StatusId = a.StatusId,
-                Price = a.Price,
-                Client = _context.Clients.Where(c => c.Id == a.ClientId)
-                                         .FirstOrDefault(),
-                Service = _context.Services.Where(s => s.Id == a.ServiceId).Select(s => new Services
+                if (_context.Appointments == null)
                 {
-                    Id = s.Id,
-                    Name= s.Name,
-                    BaseCost= s.BaseCost,
-                    BaseTimeMinutes= s.BaseTimeMinutes,
-                    CategoryId= s.CategoryId,
-                    Category= _context.Categories.Where(c => c.Id == s.CategoryId).FirstOrDefault()
-                }).FirstOrDefault(),
-                Status = _context.StatusesOfAppointments.Where(soa => soa.Id == a.StatusId).FirstOrDefault()
-            }).ToListAsync();
+                    return NotFound();
+                }
+                return await _context.Appointments.Select(a => new Appointments
+                {
+                    Id = a.Id,
+                    ClientId = a.ClientId,
+                    ServiceId = a.ServiceId,
+                    StartDateTime = a.StartDateTime,
+                    EndDateTime = a.EndDateTime,
+                    StatusId = a.StatusId,
+                    Price = a.Price,
+                    EmployeeId = a.EmployeeId,
+                    Client = _context.Clients.Where(c => c.Id == a.ClientId)
+                                             .FirstOrDefault(),
+                    Service = _context.Services.Where(s => s.Id == a.ServiceId).Select(s => new Services
+                    {
+                        Id = s.Id,
+                        Name = s.Name,
+                        BaseCost = s.BaseCost,
+                        BaseTimeMinutes = s.BaseTimeMinutes,
+                        CategoryId = s.CategoryId,
+                        Category = _context.Categories.Where(c => c.Id == s.CategoryId).FirstOrDefault()
+                    }).FirstOrDefault(),
+                    Status = _context.StatusesOfAppointments.Where(soa => soa.Id == a.StatusId).FirstOrDefault(),
+                    Employee = _context.Employees.Where(e => e.Id == a.EmployeeId).FirstOrDefault()
+                }).ToListAsync();
+            } catch (Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return NotFound(ex.Message + '\n' + ex.Source + '\n' + ex.InnerException + '\n' + ex.HelpLink);
+            }
         }
 
         // GET: api/Appointments/5
@@ -70,6 +79,7 @@ namespace SKbeautyStudio.Controllers
             appointments.Service = await _context.Services.FindAsync(appointments.ServiceId);
             appointments.Status = await _context.StatusesOfAppointments.FindAsync(appointments.StatusId);
             appointments.Client = await _context.Clients.FindAsync(appointments.ClientId);
+            appointments.Employee = await _context.Employees.FindAsync(appointments.EmployeeId);
             if(appointments.Client != null)
             {
                 appointments.Client.Appointments = new List<Appointments>();
@@ -118,9 +128,15 @@ namespace SKbeautyStudio.Controllers
           {
               return Problem("Entity set 'AppDbContext.Appointments'  is null.");
           }
-            _context.Appointments.Add(appointments);
-            await _context.SaveChangesAsync();
-
+            try
+            {
+                _context.Appointments.Add(appointments);
+                await _context.SaveChangesAsync();
+            } catch(Exception ex)
+            {
+                Console.WriteLine(ex.Message);
+                return BadRequest();
+            }
             return CreatedAtAction("GetAppointments", new { id = appointments.Id }, appointments);
         }
 

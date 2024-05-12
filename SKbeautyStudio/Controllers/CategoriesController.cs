@@ -28,23 +28,30 @@ namespace SKbeautyStudio.Controllers
           {
               return NotFound();
           }
-            return await _context.Categories.Select(c => new Categories
+            try
             {
-                Id = c.Id,
-                Name = c.Name,
-                UIColor = c.UIColor,
-                Services = _context.Services.Where(s => s.CategoryId == c.Id)
-                                            .Select(s => new Services
-                                            {
-                                                Id = s.Id,
-                                                Name = s.Name,
-                                                CategoryId = s.CategoryId,
-                                                BaseCost = s.BaseCost,
-                                                BaseTimeMinutes = s.BaseTimeMinutes
-                                            }).ToArray(),
-                MessagesTemplates = _context.MessagesTemplates.Where(mt => mt.CategoryId == c.Id).ToArray()
-                
-            }).ToListAsync();
+                return await _context.Categories.Select(c => new Categories
+                {
+                    Id = c.Id,
+                    Name = c.Name,
+                    UIColor = c.UIColor,
+                    JobName = c.JobName,
+                    Services = _context.Services.Where(s => s.CategoryId == c.Id)
+                                                .Select(s => new Services
+                                                {
+                                                    Id = s.Id,
+                                                    Name = s.Name,
+                                                    CategoryId = s.CategoryId,
+                                                    BaseCost = s.BaseCost,
+                                                    BaseTimeMinutes = s.BaseTimeMinutes
+                                                }).ToArray(),
+                    MessagesTemplates = _context.MessagesTemplates.Where(mt => mt.CategoriesId == c.Id).ToArray()
+
+                }).ToListAsync();
+            } catch(Exception ex)
+            {
+                return NotFound(ex.Message);
+            }
         }
 
         // GET: api/Categories/5
@@ -69,7 +76,7 @@ namespace SKbeautyStudio.Controllers
                 BaseCost = s.BaseCost,
                 BaseTimeMinutes = s.BaseTimeMinutes
             }).ToArray();
-            categories.MessagesTemplates = _context.MessagesTemplates.Where(mt => mt.CategoryId == categories.Id).ToArray();
+            categories.MessagesTemplates = _context.MessagesTemplates.Where(mt => mt.CategoriesId == categories.Id).ToArray();
             return categories;
         }
 
@@ -145,10 +152,10 @@ namespace SKbeautyStudio.Controllers
             {
                 return NotFound();
             }
-            var messages = await _context.MessagesTemplates.Where(mt => mt.CategoryId == id).Select(m => new MessagesTemplates
+            var messages = await _context.MessagesTemplates.Where(mt => mt.CategoriesId == id).Select(m => new MessagesTemplates
             {
                 Id = m.Id,
-                CategoryId = m.CategoryId,
+                CategoriesId = m.CategoriesId,
                 Before = m.Before,
                 HoursCount = m.HoursCount,
                 Text = m.Text,

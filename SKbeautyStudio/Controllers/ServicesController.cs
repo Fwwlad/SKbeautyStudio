@@ -28,6 +28,8 @@ namespace SKbeautyStudio.Controllers
           {
               return NotFound();
           }
+            try
+            {
             return await _context.Services.Select(s => new Services
             {
                 Id = s.Id,
@@ -37,6 +39,11 @@ namespace SKbeautyStudio.Controllers
                 CategoryId = s.CategoryId,
                 Category = _context.Categories.Where(c => c.Id == s.CategoryId).FirstOrDefault()
             }).ToListAsync();
+            } catch(Exception ex)
+            {
+                return NotFound(ex.Message + '\n' + ex.Source + '\n' + ex.InnerException + '\n' + ex.HelpLink);
+                
+            }
         }
 
         // GET: api/Services/5
@@ -57,7 +64,8 @@ namespace SKbeautyStudio.Controllers
             {
                 Id = c.Id,
                 Name = c.Name,
-                UIColor = c.UIColor
+                UIColor = c.UIColor,
+                JobName = c.JobName
             }).ToList().Find(c => c.Id == services.CategoryId);
             return services;
         }
