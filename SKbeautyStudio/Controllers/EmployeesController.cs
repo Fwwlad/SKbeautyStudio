@@ -59,7 +59,13 @@ namespace SKbeautyStudio.Controllers
                                             MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
                                         }).ToArray(),
                 AvailableCategories = _context.EmployeesJobTitles
-                                      .Where(ejt => ejt.EmployeesId == e.Id).ToArray()
+                                      .Where(ejt => ejt.EmployeesId == e.Id).Select(ejt => new EmployeesJobTitles
+                                      {
+                                          CategoriesId = ejt.CategoriesId,
+                                          EmployeesId = ejt.EmployeesId,
+                                          Employees = _context.Employees.Where(e => e.Id == ejt.EmployeesId).FirstOrDefault(),
+                                          Categories = _context.Categories.Where(c => c.Id == ejt.CategoriesId).FirstOrDefault()
+                                      }).ToArray()
             }).ToListAsync();
         } catch(Exception ex)
             {
@@ -95,7 +101,15 @@ namespace SKbeautyStudio.Controllers
                                             Employees = null,
                                             MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
                                         }).ToList();
-            employees.AvailableCategories = _context.EmployeesJobTitles.Where(ejt => ejt.EmployeesId == employees.Id).ToArray();
+            employees.AvailableCategories = _context.EmployeesJobTitles
+                                            .Where(ejt => ejt.EmployeesId == employees.Id)
+                                            .Select(ejt => new EmployeesJobTitles
+                                            {
+                                                CategoriesId = ejt.CategoriesId,
+                                                EmployeesId = ejt.EmployeesId,
+                                                Employees = _context.Employees.Where(e => e.Id == ejt.EmployeesId).FirstOrDefault(),
+                                                Categories = _context.Categories.Where(c => c.Id == ejt.CategoriesId).FirstOrDefault()
+                                            }).ToArray();
             return employees;
         }
         
