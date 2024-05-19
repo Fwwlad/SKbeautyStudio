@@ -30,7 +30,9 @@ namespace SKbeautyStudio.Controllers
             {
                 return NotFound();
             }
-            return await _context.EmployeesPasswords.Select(ep => new EmployeesPasswords
+            try
+            {
+            var res =  _context.EmployeesPasswords.Select(ep => new EmployeesPasswords
             {
                 Login = ep.Login,
                 Password = ep.Password,
@@ -47,9 +49,26 @@ namespace SKbeautyStudio.Controllers
                     DateOfHire = em.DateOfHire,
                     Email = em.Email,
                     SalaryPercent = em.SalaryPercent,
-                    EmployeeMobileAppPages = _context.EmployeesMobileAppPages.Where(emap => emap.EmployeeId == ep.EmployeeId).ToArray()
+                    EmployeeMobileAppPages = _context.EmployeesMobileAppPages
+                                        .Where(emap => emap.EmployeeId == em.Id)
+                                        .Select(emap => new EmployeesMobileAppPages
+                                        {
+                                            EmployeeId = emap.EmployeeId,
+                                            MobileAppPageId = emap.MobileAppPageId,
+                                            CanView = emap.CanView,
+                                            CanAdd = emap.CanAdd,
+                                            CanDelete = emap.CanDelete,
+                                            CanEdit = emap.CanEdit,
+                                            Employees = null,
+                                            MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
+                                        }).ToArray()
                 }).FirstOrDefault()
-            }).ToListAsync();
+            }).ToList();
+            return res;
+            } catch(Exception ex)
+            {
+                return NotFound();
+            }
         }
         // PUT: api/EmployeesPasswords/5
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
@@ -65,7 +84,7 @@ namespace SKbeautyStudio.Controllers
             {
                 return NotFound();
             }
-            if (await _context.Employees.FindAsync(login) == null)
+            if (_context.Employees.Where(e => e.Id == employeesPasswords.EmployeeId).Count() == 0)
             {
                 return NotFound();
             }
@@ -156,7 +175,7 @@ namespace SKbeautyStudio.Controllers
         }
 
         // DELETE: api/EmployeesPasswords/5
-        [HttpDelete("{id}")]
+        [HttpDelete("{login}")]
         public async Task<IActionResult> DeleteEmployeesPasswords(string login)
         {
             if (_context.EmployeesPasswords == null)
@@ -175,7 +194,7 @@ namespace SKbeautyStudio.Controllers
             return NoContent();
         }
         [HttpGet("{login}/password/validate/{password}")]
-        public async Task<ActionResult<ICollection<EmployeesMobileAppPages>>> CheckPassword(string login, string password)
+        public async Task<ActionResult<Employees>> CheckPassword(string login, string password)
         {
             if (_context.Employees == null)
             {
@@ -189,25 +208,40 @@ namespace SKbeautyStudio.Controllers
 
             if (validatePassword(account, password))
             {
-                var rights = await _context.EmployeesMobileAppPages.Where(emap => emap.EmployeeId == account.EmployeeId).Select(
-                    emap => new EmployeesMobileAppPages
-                    {
-                        EmployeeId = emap.EmployeeId,
-                        MobileAppPageId = emap.MobileAppPageId,
-                        CanAdd = emap.CanAdd,
-                        CanDelete = emap.CanDelete,
-                        CanEdit = emap.CanEdit,
-                        CanView = emap.CanView,
-                        Employees = _context.Employees.Where(e => e.Id == emap.EmployeeId).FirstOrDefault(),
-                        MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
-                    }
-                ).ToListAsync();
+                var employees = await _context.Employees.FindAsync(account.EmployeeId);
 
-                return rights is null ? NoContent() : rights;
+                if (employees == null)
+                {
+                    return NotFound();
+                }
+
+                employees.EmployeeMobileAppPages = _context.EmployeesMobileAppPages
+                                            .Where(emap => emap.EmployeeId == employees.Id)
+                                            .Select(emap => new EmployeesMobileAppPages
+                                            {
+                                                EmployeeId = emap.EmployeeId,
+                                                MobileAppPageId = emap.MobileAppPageId,
+                                                CanView = emap.CanView,
+                                                CanAdd = emap.CanAdd,
+                                                CanDelete = emap.CanDelete,
+                                                CanEdit = emap.CanEdit,
+                                                Employees = null,
+                                                MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
+                                            }).ToList();
+                employees.AvailableCategories = _context.EmployeesJobTitles
+                                                .Where(ejt => ejt.EmployeesId == employees.Id)
+                                                .Select(ejt => new EmployeesJobTitles
+                                                {
+                                                    CategoriesId = ejt.CategoriesId,
+                                                    EmployeesId = ejt.EmployeesId,
+                                                    Categories = _context.Categories.Where(c => c.Id == ejt.CategoriesId).FirstOrDefault()
+                                                }).ToArray();
+
+                return employees;
             }
 
 
-            return NoContent();
+            return NotFound();
         }
         private bool validatePassword(EmployeesPasswords employeePassword, string password)
         {

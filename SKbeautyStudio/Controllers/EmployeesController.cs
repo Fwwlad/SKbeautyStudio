@@ -63,7 +63,6 @@ namespace SKbeautyStudio.Controllers
                                       {
                                           CategoriesId = ejt.CategoriesId,
                                           EmployeesId = ejt.EmployeesId,
-                                          Employees = _context.Employees.Where(e => e.Id == ejt.EmployeesId).FirstOrDefault(),
                                           Categories = _context.Categories.Where(c => c.Id == ejt.CategoriesId).FirstOrDefault()
                                       }).ToArray()
             }).ToListAsync();
@@ -107,7 +106,6 @@ namespace SKbeautyStudio.Controllers
                                             {
                                                 CategoriesId = ejt.CategoriesId,
                                                 EmployeesId = ejt.EmployeesId,
-                                                Employees = _context.Employees.Where(e => e.Id == ejt.EmployeesId).FirstOrDefault(),
                                                 Categories = _context.Categories.Where(c => c.Id == ejt.CategoriesId).FirstOrDefault()
                                             }).ToArray();
             return employees;
@@ -290,7 +288,7 @@ namespace SKbeautyStudio.Controllers
             return NoContent();
         }
         [HttpGet("{login}/password/validate/{password}")]
-        public async Task<ActionResult<ICollection<EmployeesMobileAppPages>>> CheckPassword(string login, string password)
+        public async Task<ActionResult<Employees>> CheckPassword(string login, string password)
         {
             if (_context.Employees == null)
             {
@@ -301,28 +299,41 @@ namespace SKbeautyStudio.Controllers
             {
                 return NotFound();
             }
-            
+
             if (validatePassword(account, password))
             {
-                var rights = await _context.EmployeesMobileAppPages.Where(emap => emap.EmployeeId == account.EmployeeId).Select(
-                    emap => new EmployeesMobileAppPages
-                    {
-                        EmployeeId = emap.EmployeeId,
-                        MobileAppPageId = emap.MobileAppPageId,
-                        CanAdd = emap.CanAdd,
-                        CanDelete = emap.CanDelete,
-                        CanEdit = emap.CanEdit,
-                        CanView = emap.CanView,
-                        Employees = _context.Employees.Where(e => e.Id == emap.EmployeeId).FirstOrDefault(),
-                        MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
-                    }
-                ).ToListAsync();
-                
-                return rights is null ? NoContent() : rights;
+                var employees = await _context.Employees.FindAsync(account.EmployeeId);
+
+                if (employees == null)
+                {
+                    return NotFound();
+                }
+
+                employees.EmployeeMobileAppPages = _context.EmployeesMobileAppPages
+                                            .Where(emap => emap.EmployeeId == employees.Id)
+                                            .Select(emap => new EmployeesMobileAppPages
+                                            {
+                                                EmployeeId = emap.EmployeeId,
+                                                MobileAppPageId = emap.MobileAppPageId,
+                                                CanView = emap.CanView,
+                                                CanAdd = emap.CanAdd,
+                                                CanDelete = emap.CanDelete,
+                                                CanEdit = emap.CanEdit,
+                                                Employees = null,
+                                                MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
+                                            }).ToList();
+                employees.AvailableCategories = _context.EmployeesJobTitles
+                                                .Where(ejt => ejt.EmployeesId == employees.Id)
+                                                .Select(ejt => new EmployeesJobTitles
+                                                {
+                                                    CategoriesId = ejt.CategoriesId,
+                                                    EmployeesId = ejt.EmployeesId,
+                                                    Categories = _context.Categories.Where(c => c.Id == ejt.CategoriesId).FirstOrDefault()
+                                                }).ToArray();
+
+                return employees;
             }
-
-
-            return NoContent();
+            return NotFound();
         }
         [HttpPost("{id}/password")]
         public async Task<IActionResult> SetPassword(int id, string login, string password)
