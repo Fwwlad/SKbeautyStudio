@@ -1,17 +1,22 @@
 ﻿using System;
 using System.Collections.Generic;
+using System.IdentityModel.Tokens.Jwt;
 using System.Linq;
+using System.Security.Claims;
 using System.Security.Cryptography;
 using System.Text;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.IdentityModel.Tokens;
 using NuGet.Protocol.Plugins;
 using SKbeautyStudio.Db;
 
 namespace SKbeautyStudio.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class EmployeesPasswordsController : ControllerBase
@@ -193,8 +198,9 @@ namespace SKbeautyStudio.Controllers
 
             return NoContent();
         }
+        [AllowAnonymous]
         [HttpGet("{login}/password/validate/{password}")]
-        public async Task<ActionResult<Employees>> CheckPassword(string login, string password)
+        public async Task<IActionResult> CheckPassword(string login, string password)
         {
             if (_context.Employees == null)
             {
@@ -215,7 +221,7 @@ namespace SKbeautyStudio.Controllers
                     return NotFound();
                 }
 
-                employees.EmployeeMobileAppPages = _context.EmployeesMobileAppPages
+                /*employees.EmployeeMobileAppPages = _context.EmployeesMobileAppPages
                                             .Where(emap => emap.EmployeeId == employees.Id)
                                             .Select(emap => new EmployeesMobileAppPages
                                             {
@@ -237,11 +243,26 @@ namespace SKbeautyStudio.Controllers
                                                     Categories = _context.Categories.Where(c => c.Id == ejt.CategoriesId).FirstOrDefault()
                                                 }).ToArray();
 
-                return employees;
+                return employees;*/
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes("qiuf111HisAxm39S9cfk!dfid9ScC31JhdblaEIdn4bwoe342");
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new Claim[]
+                    {
+                        new Claim(ClaimTypes.Name, login)
+                    }),
+                    Expires = DateTime.UtcNow.AddHours(1),
+                    Issuer = "SKstudioMobileApp",
+                    Audience = "SKstudioApi",
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                return Ok(new { Token = tokenHandler.WriteToken(token) });
             }
 
 
-            return NotFound();
+            return Unauthorized();
         }
         private bool validatePassword(EmployeesPasswords employeePassword, string password)
         {
