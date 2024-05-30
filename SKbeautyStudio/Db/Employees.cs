@@ -9,7 +9,7 @@
         public string? Phone { get; set; }
         public DateTime? Birthday { get; set; }
         public DateTime DateOfHire { get; set; }
-        public char Gender { get; set; }
+        public string Gender { get; set; } = "";
         public string? Email { get; set; }
         public double SalaryPercent { get; set; }
         public ICollection<EmployeesMobileAppPages>? EmployeeMobileAppPages { get; set; }

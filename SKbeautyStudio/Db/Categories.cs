@@ -11,5 +11,6 @@ namespace SKbeautyStudio.Db
         public string? JobName { get; set; } = "";
         public ICollection<Services>? Services { get; set; }
         public ICollection<MessagesTemplates>? MessagesTemplates { get; set; }
+        public ICollection<EmployeesJobTitles>? EmployeesJobsTitles { get; set; }
     }
 }

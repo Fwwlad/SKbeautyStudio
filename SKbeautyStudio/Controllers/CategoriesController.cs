@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using SKbeautyStudio.Db;
 
 namespace SKbeautyStudio.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class CategoriesController : ControllerBase
@@ -45,8 +47,8 @@ namespace SKbeautyStudio.Controllers
                                                     BaseCost = s.BaseCost,
                                                     BaseTimeMinutes = s.BaseTimeMinutes
                                                 }).ToArray(),
-                    MessagesTemplates = _context.MessagesTemplates.Where(mt => mt.CategoriesId == c.Id).ToArray()
-
+                    MessagesTemplates = _context.MessagesTemplates.Where(mt => mt.CategoriesId == c.Id).ToArray(),
+                    EmployeesJobsTitles = _context.EmployeesJobTitles.Where(ejt => ejt.CategoriesId == c.Id).ToArray()
                 }).ToListAsync();
             } catch(Exception ex)
             {
@@ -77,6 +79,7 @@ namespace SKbeautyStudio.Controllers
                 BaseTimeMinutes = s.BaseTimeMinutes
             }).ToArray();
             categories.MessagesTemplates = _context.MessagesTemplates.Where(mt => mt.CategoriesId == categories.Id).ToArray();
+            categories.EmployeesJobsTitles = _context.EmployeesJobTitles.Where(ejt => ejt.CategoriesId == categories.Id).ToArray();
             return categories;
         }
 

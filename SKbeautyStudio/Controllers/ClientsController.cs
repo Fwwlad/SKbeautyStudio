@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Linq;
 using System.Threading.Tasks;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
@@ -9,6 +10,7 @@ using SKbeautyStudio.Db;
 
 namespace SKbeautyStudio.Controllers
 {
+    [Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class ClientsController : ControllerBase
@@ -131,5 +133,6 @@ namespace SKbeautyStudio.Controllers
         {
             return (_context.Clients?.Any(e => e.Id == id)).GetValueOrDefault();
         }
+
     }
 }

@@ -7,8 +7,18 @@ namespace SKbeautyStudio.Db
         public int ClientId { get; set; }
         public int ServiceId { get; set; }
         public int EmployeeId { get; set; }
-        public DateTime StartDateTime { get; set; }
-        public DateTime EndDateTime { get; set; }
+        private DateTime _startDateTime;
+        public DateTime StartDateTime
+        {
+            get => _startDateTime.AddHours(3);
+            set => _startDateTime = value;
+        }
+        private DateTime _endDateTime;
+        public DateTime EndDateTime
+        {
+            get => _endDateTime.AddHours(3);
+            set => _endDateTime = value;
+        }
         public int StatusId { get; set; }
         public int Price { get; set; }
         public Clients? Client { get; set; }

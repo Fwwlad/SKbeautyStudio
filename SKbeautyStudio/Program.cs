@@ -1,23 +1,52 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SKbeautyStudio.Db;
+using Microsoft.AspNetCore.Authentication.JwtBearer;
+using Microsoft.IdentityModel.Tokens;
+using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-// Add services to the container.
-
-builder.Services.AddControllers();
-// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
-builder.Services.AddEndpointsApiExplorer();
-builder.Services.AddSwaggerGen();
-//var StringConnection = builder.Configuration["ConnectionString"];
 string StringConnection = builder.Configuration.GetConnectionString("DB");
 builder.Services.AddDbContext<AppDbContext>(
     options => options.UseSqlServer(StringConnection)
     );
 
+//builder.Services.AddIdentity<EmployeesPasswords, IdentityRole>()
+//    .AddEntityFrameworkStores<AppDbContext>()
+//    .AddDefaultTokenProviders();
+
+
+builder.Services.AddControllers();
+builder.Services.AddEndpointsApiExplorer();
+builder.Services.AddSwaggerGen();
+
+
+var key = Encoding.ASCII.GetBytes(builder.Configuration.GetConnectionString("KEY"));
+builder.Services.AddAuthentication(options =>
+{   
+    options.DefaultAuthenticateScheme = JwtBearerDefaults.AuthenticationScheme;
+    options.DefaultChallengeScheme = JwtBearerDefaults.AuthenticationScheme;
+})
+.AddJwtBearer(options =>
+{
+    options.TokenValidationParameters = new TokenValidationParameters
+    {
+        ValidateIssuer = true,
+        ValidateAudience = true,
+        ValidateLifetime = true,
+        ValidateIssuerSigningKey = true,
+        ValidIssuer = "SKstudioMobileApp",
+        ValidAudience = "SKstudioApi",
+        IssuerSigningKey = new SymmetricSecurityKey(key)
+    };
+});
+
+builder.Services.AddAuthorization();
+
 var app = builder.Build();
-    
-// Configure the HTTP request pipeline.
 //if (app.Environment.IsDevelopment())
 //{
     app.UseSwagger();
@@ -26,6 +55,7 @@ var app = builder.Build();
 
 app.UseHttpsRedirection();
 
+app.UseAuthentication();
 app.UseAuthorization();
 
 app.MapControllers();

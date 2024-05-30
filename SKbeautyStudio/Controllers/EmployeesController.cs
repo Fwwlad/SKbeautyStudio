@@ -9,9 +9,14 @@ using SKbeautyStudio.Db;
 using Newtonsoft.Json.Linq;
 using System.Text;
 using System.Security.Cryptography;
+using Microsoft.AspNetCore.Authorization;
+using Microsoft.IdentityModel.Tokens;
+using System.IdentityModel.Tokens.Jwt;
+using System.Security.Claims;
 
 namespace SKbeautyStudio.Controllers
 {
+    //[Authorize]
     [Route("api/[controller]")]
     [ApiController]
     public class EmployeesController : ControllerBase
@@ -59,7 +64,12 @@ namespace SKbeautyStudio.Controllers
                                             MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
                                         }).ToArray(),
                 AvailableCategories = _context.EmployeesJobTitles
-                                      .Where(ejt => ejt.EmployeesId == e.Id).ToArray()
+                                      .Where(ejt => ejt.EmployeesId == e.Id).Select(ejt => new EmployeesJobTitles
+                                      {
+                                          CategoriesId = ejt.CategoriesId,
+                                          EmployeesId = ejt.EmployeesId,
+                                          Categories = _context.Categories.Where(c => c.Id == ejt.CategoriesId).FirstOrDefault()
+                                      }).ToArray()
             }).ToListAsync();
         } catch(Exception ex)
             {
@@ -95,7 +105,14 @@ namespace SKbeautyStudio.Controllers
                                             Employees = null,
                                             MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
                                         }).ToList();
-            employees.AvailableCategories = _context.EmployeesJobTitles.Where(ejt => ejt.EmployeesId == employees.Id).ToArray();
+            employees.AvailableCategories = _context.EmployeesJobTitles
+                                            .Where(ejt => ejt.EmployeesId == employees.Id)
+                                            .Select(ejt => new EmployeesJobTitles
+                                            {
+                                                CategoriesId = ejt.CategoriesId,
+                                                EmployeesId = ejt.EmployeesId,
+                                                Categories = _context.Categories.Where(c => c.Id == ejt.CategoriesId).FirstOrDefault()
+                                            }).ToArray();
             return employees;
         }
         
@@ -161,6 +178,25 @@ namespace SKbeautyStudio.Controllers
             }
 
 
+            return true;
+        }
+        [HttpPost("job")]
+        public async Task<ActionResult<bool>> PostEmployees(EmployeesJobTitles jobTitles)
+        {
+
+            if (_context.Employees == null)
+            {
+                return Problem("Entity set 'AppDbContext.Employees'  is null.");
+            }
+            try
+            {
+                _context.EmployeesJobTitles.Add(jobTitles);
+                await _context.SaveChangesAsync();
+            }
+            catch (Exception ex)
+            {
+                return false;
+            }
             return true;
         }
         [HttpPut("{id}/rights")]
@@ -256,8 +292,9 @@ namespace SKbeautyStudio.Controllers
 
             return NoContent();
         }
+        [AllowAnonymous]
         [HttpGet("{login}/password/validate/{password}")]
-        public async Task<ActionResult<ICollection<EmployeesMobileAppPages>>> CheckPassword(string login, string password)
+        public async Task<IActionResult> CheckPassword(string login, string password)
         {
             if (_context.Employees == null)
             {
@@ -268,28 +305,56 @@ namespace SKbeautyStudio.Controllers
             {
                 return NotFound();
             }
-            
+
             if (validatePassword(account, password))
             {
-                var rights = await _context.EmployeesMobileAppPages.Where(emap => emap.EmployeeId == account.EmployeeId).Select(
-                    emap => new EmployeesMobileAppPages
+                var employees = await _context.Employees.FindAsync(account.EmployeeId);
+
+                if (employees == null)
+                {
+                    return NotFound();
+                }
+
+                /*employees.EmployeeMobileAppPages = _context.EmployeesMobileAppPages
+                                            .Where(emap => emap.EmployeeId == employees.Id)
+                                            .Select(emap => new EmployeesMobileAppPages
+                                            {
+                                                EmployeeId = emap.EmployeeId,
+                                                MobileAppPageId = emap.MobileAppPageId,
+                                                CanView = emap.CanView,
+                                                CanAdd = emap.CanAdd,
+                                                CanDelete = emap.CanDelete,
+                                                CanEdit = emap.CanEdit,
+                                                Employees = null,
+                                                MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
+                                            }).ToList();
+                employees.AvailableCategories = _context.EmployeesJobTitles
+                                                .Where(ejt => ejt.EmployeesId == employees.Id)
+                                                .Select(ejt => new EmployeesJobTitles
+                                                {
+                                                    CategoriesId = ejt.CategoriesId,
+                                                    EmployeesId = ejt.EmployeesId,
+                                                    Categories = _context.Categories.Where(c => c.Id == ejt.CategoriesId).FirstOrDefault()
+                                                }).ToArray();
+
+                return employees;*/
+                var tokenHandler = new JwtSecurityTokenHandler();
+                var key = Encoding.ASCII.GetBytes("qiuf111HisAxm39S9cfk!dfid9ScC31JhdblaEIdn4bwoe342");
+                var tokenDescriptor = new SecurityTokenDescriptor
+                {
+                    Subject = new ClaimsIdentity(new Claim[]
                     {
-                        EmployeeId = emap.EmployeeId,
-                        MobileAppPageId = emap.MobileAppPageId,
-                        CanAdd = emap.CanAdd,
-                        CanDelete = emap.CanDelete,
-                        CanEdit = emap.CanEdit,
-                        CanView = emap.CanView,
-                        Employees = _context.Employees.Where(e => e.Id == emap.EmployeeId).FirstOrDefault(),
-                        MobileAppPage = _context.MobileAppPages.Where(map => map.Id == emap.MobileAppPageId).FirstOrDefault()
-                    }
-                ).ToListAsync();
-                
-                return rights is null ? NoContent() : rights;
+                        new Claim(ClaimTypes.Name, login)
+                    }),
+                    Expires = DateTime.UtcNow.AddHours(1),
+                    Issuer = "SKstudioMobileApp",
+                    Audience = "SKstudioApi",
+                    SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
+                };
+                var token = tokenHandler.CreateToken(tokenDescriptor);
+                return Ok(new { Token = tokenHandler.WriteToken(token), EmployeeId = employees.Id });
             }
-
-
-            return NoContent();
+            return Unauthorized();
         }
         [HttpPost("{id}/password")]
         public async Task<IActionResult> SetPassword(int id, string login, string password)
