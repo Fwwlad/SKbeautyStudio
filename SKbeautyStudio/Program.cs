@@ -9,7 +9,7 @@ using System.Text;
 
 var builder = WebApplication.CreateBuilder(args);
 
-string StringConnection = builder.Configuration.GetConnectionString("LOCAL_DB");
+string StringConnection = builder.Configuration.GetConnectionString("DB");
 builder.Services.AddDbContext<AppDbContext>(
     options => options.UseSqlServer(StringConnection)
     );

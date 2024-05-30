@@ -40,7 +40,7 @@ public class AccountController : ControllerBase
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return Ok(new { Token = tokenHandler.WriteToken(token) });
+            return Ok(new { Token = tokenHandler.WriteToken(token), EmployeeId = user.EmployeeId });
         }
         return Unauthorized();
     }
