@@ -352,7 +352,7 @@ namespace SKbeautyStudio.Controllers
                     SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
                 };
                 var token = tokenHandler.CreateToken(tokenDescriptor);
-                return Ok(new { Token = tokenHandler.WriteToken(token), EmployeeId = employees.Id });
+                return Ok(new { Token = tokenHandler.WriteToken(token), Employee = employees });
             }
             return Unauthorized();
         }

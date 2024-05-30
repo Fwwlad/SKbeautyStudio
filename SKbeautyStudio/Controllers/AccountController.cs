@@ -26,6 +26,7 @@ public class AccountController : ControllerBase
         var user = await _context.EmployeesPasswords.Where(ep => ep.Login == model.Username).FirstOrDefaultAsync();
         if (user != null && validatePassword(user, model.Password))
         {
+            var employees = await _context.Employees.FindAsync(user.EmployeeId);
             var tokenHandler = new JwtSecurityTokenHandler();
             var key = Encoding.ASCII.GetBytes("qiuf111HisAxm39S9cfk!dfid9ScC31JhdblaEIdn4bwoe342");
             var tokenDescriptor = new SecurityTokenDescriptor
@@ -40,7 +41,7 @@ public class AccountController : ControllerBase
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey(key), SecurityAlgorithms.HmacSha256Signature)
             };
             var token = tokenHandler.CreateToken(tokenDescriptor);
-            return Ok(new { Token = tokenHandler.WriteToken(token), EmployeeId = user.EmployeeId });
+            return Ok(new { Token = tokenHandler.WriteToken(token), Employee = employees });
         }
         return Unauthorized();
     }
