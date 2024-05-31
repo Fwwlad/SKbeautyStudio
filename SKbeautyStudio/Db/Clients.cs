@@ -11,7 +11,7 @@ namespace SKbeautyStudio.Db
         public string Gender { get; set; } = "";
         public string Phone { get; set; } = "";
         public string? Notes { get; set; }
-        public int Password { get; set; }
+        public int? Password { get; set; }
         public ICollection<Appointments>? Appointments { get; set; }
         
     }
