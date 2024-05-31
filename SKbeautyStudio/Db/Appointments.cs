@@ -10,13 +10,13 @@ namespace SKbeautyStudio.Db
         private DateTime _startDateTime;
         public DateTime StartDateTime
         {
-            get => _startDateTime.AddHours(3);
+            get => _startDateTime;//.AddHours(3);
             set => _startDateTime = value;
         }
         private DateTime _endDateTime;
         public DateTime EndDateTime
         {
-            get => _endDateTime.AddHours(3);
+            get => _endDateTime;//.AddHours(3);
             set => _endDateTime = value;
         }
         public int StatusId { get; set; }

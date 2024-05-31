@@ -126,6 +126,7 @@ namespace SKbeautyStudio.Controllers
 
         // POST: api/EmployeesJobTitles
         // To protect from overposting attacks, see https://go.microsoft.com/fwlink/?linkid=2123754
+        [AllowAnonymous]
         [HttpPost]
         public async Task<ActionResult<EmployeesJobTitles>> PostEmployeesJobTitles(EmployeesJobTitles employeesJobTitles)
         {
