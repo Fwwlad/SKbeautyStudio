@@ -40,6 +40,7 @@ namespace SKbeautyStudio.Controllers
                 Gender = c.Gender,
                 Phone = c.Phone,
                 Notes = c.Notes,
+                Password = c.Password,
                 Appointments = _context.Appointments.Where(a => a.ClientId == c.Id).ToList()
             }).ToListAsync();
         }
@@ -105,7 +106,8 @@ namespace SKbeautyStudio.Controllers
           }
             _context.Clients.Add(client);
             await _context.SaveChangesAsync();
-
+            var now = DateTime.UtcNow;
+            client.Password = Convert.ToInt32(Convert.ToString(now.Minute) + Convert.ToString(now.Second) + Convert.ToString(now.Month) + Convert.ToString(now.Day) + Convert.ToString(client.Id));
             return CreatedAtAction("GetClient", new { id = client.Id }, client);
         }
 
