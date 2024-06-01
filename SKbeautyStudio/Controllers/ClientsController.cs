@@ -104,10 +104,10 @@ namespace SKbeautyStudio.Controllers
           {
               return Problem("Entity set 'AppDbContext.Clients'  is null.");
           }
-            _context.Clients.Add(client);
-            await _context.SaveChangesAsync();
             var now = DateTime.UtcNow;
             client.Password = Convert.ToInt32(Convert.ToString(now.Minute) + Convert.ToString(now.Second) + Convert.ToString(now.Month) + Convert.ToString(now.Day) + Convert.ToString(client.Id));
+            _context.Clients.Add(client);
+            await _context.SaveChangesAsync();
             return CreatedAtAction("GetClient", new { id = client.Id }, client);
         }
 
