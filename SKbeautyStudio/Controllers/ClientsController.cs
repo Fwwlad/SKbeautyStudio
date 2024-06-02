@@ -73,13 +73,23 @@ namespace SKbeautyStudio.Controllers
             {
                 return BadRequest();
             }
-
+            if(client.Password is null)
+            {
+                var now = DateTime.UtcNow;
+                client.Password = Convert.ToInt32(Convert.ToString(now.Minute) + Convert.ToString(now.Second) + Convert.ToString(now.Month) + Convert.ToString(now.Day) + Convert.ToString(client.Id));
+                while (_context.Clients.Any(c => c.Password == client.Password))
+                {
+                    client.Password += 1;
+                }
+            }
             _context.Entry(client).State = EntityState.Modified;
 
             try
             {
                 await _context.SaveChangesAsync();
             }
+
+
             catch (DbUpdateConcurrencyException)
             {
                 if (!ClientExists(id))
@@ -106,6 +116,10 @@ namespace SKbeautyStudio.Controllers
           }
             var now = DateTime.UtcNow;
             client.Password = Convert.ToInt32(Convert.ToString(now.Minute) + Convert.ToString(now.Second) + Convert.ToString(now.Month) + Convert.ToString(now.Day) + Convert.ToString(client.Id));
+            while(_context.Clients.Any(c => c.Password == client.Password))
+            {
+                client.Password += 1;
+            }
             _context.Clients.Add(client);
             await _context.SaveChangesAsync();
             return CreatedAtAction("GetClient", new { id = client.Id }, client);
